@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoga and Weight Lifting Tracker</title>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #f472b6;
+            --bg: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            padding: 1rem; /* Reduced for mobile */
+        }
+
+        .tracker-container {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 1rem; /* Reduced for mobile */
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem; /* Smaller for mobile */
+            color: #1f2937;
+            margin-bottom: 0.5rem; /* Reduced */
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #4b5563;
+            max-width: 600px;
+            margin: 0 auto 1rem; /* Reduced */
+            line-height: 1.6;
+            text-align: center;
+            font-size: 0.875rem; /* Smaller for mobile */
+        }
+
+        .week {
+            margin-bottom: 0.5rem; /* Reduced significantly */
+            background: #f9fafb;
+            border-radius: 1rem;
+            padding: 1rem; /* Reduced */
+            transition: transform 0.2s;
+        }
+
+        .week:hover {
+            transform: translateY(-2px);
+        }
+
+        .week-label {
+            font-size: 0.875rem; /* Added for mobile */
+            font-weight: 600;
+            margin-bottom: 0.25rem; /* Reduced */
+        }
+
+        .yoga-row, .weights-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(25px, 1fr)); /* Tighter grid for mobile */
+            gap: 0.25rem; /* Reduced */
+            margin: 0.25rem 0; /* Reduced */
+        }
+
+        .day {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.5rem; /* Reduced */
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+            position: relative;
+            min-height: 40px; /* Reduced */
+        }
+
+        .day:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .day.completed {
+            background: #f0fdf4;
+            border-color: #4ade80;
+        }
+
+        .weights-row .day.completed {
+            background: #fff7ed;
+            border-color: #fb923c;
+        }
+
+        .emoji, .completed-emoji {
+            font-size: 1rem; /* Smaller for mobile */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .completed-emoji {
+            display: none;
+        }
+
+        .day.completed .completed-emoji {
+            display: inline;
+        }
+
+        .day.completed .emoji {
+            display: none;
+        }
+
+        .date {
+            font-size: 0.6rem; /* Smaller for mobile */
+            color: #6b7280;
+            margin-top: 0.125rem; /* Reduced */
+            font-weight: 500;
+        }
+
+        #reset {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem; /* Reduced */
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem auto 0; /* Reduced */
+            font-size: 0.875rem; /* Smaller */
+        }
+
+        #reset:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 2rem 1rem;
+            }
+            .tracker-container {
+                padding: 2rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            p {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+            .week {
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+            }
+            .week-label {
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+            .yoga-row {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            .weights-row {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .day {
+                padding: 1.25rem;
+                min-height: 60px;
+            }
+            .emoji, .completed-emoji {
+                font-size: 1.75rem;
+            }
+            .date {
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+            }
+            #reset {
+                padding: 0.75rem 2rem;
+                font-size: 1rem;
+                margin: 2rem auto 0;
+            }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .completed-emoji {
+            animation: pop 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="tracker-container">
+        <h1>Yoga & Weight Lifting Tracker</h1>
+        <div class="tracker"></div>
+        <button id="reset">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
+            Reset Progress
+        </button>
+    </div>
+
+    <script>
+        // Define emojis
+        const yogaEmoji = '🧘🏻‍♀️';
+        const yogaCompletedEmoji = '💖';
+        const weightsEmoji = '🏋🏻‍♀️';
+        const weightsCompletedEmoji = '🏆';
+
+        // Initialize progress arrays
+        let yogaProgress = localStorage.getItem('yogaProgress') 
+            ? JSON.parse(localStorage.getItem('yogaProgress')) 
+            : new Array(112).fill(false); // 16 weeks * 7 days
+        let weightsProgress = localStorage.getItem('weightsProgress') 
+            ? JSON.parse(localStorage.getItem('weightsProgress')) 
+            : new Array(64).fill(false); // 16 weeks * 4 sessions
+
+        const tracker = document.querySelector('.tracker');
+        const startDate = new Date(2025, 1, 26); // February 26, 2025
+        const dates = [];
+        for (let i = 0; i < 112; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            dates.push(date);
+        }
+
+        // Format date as MM/DD
+        function formatDate(date) {
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${month}/${day}`;
+        }
+
+        // Generate tracker for 16 weeks
+        for (let weekIndex = 0; weekIndex < 16; weekIndex++) {
+            const weekDiv = document.createElement('div');
+            weekDiv.className = 'week';
+
+            const weekLabel = document.createElement('div');
+            weekLabel.className = 'week-label';
+            weekLabel.textContent = `Week ${weekIndex + 1}`;
+
+            const weekContent = document.createElement('div');
+            weekContent.className = 'week-content';
+
+            const yogaRow = document.createElement('div');
+            yogaRow.className = 'yoga-row';
+            for (let day = 0; day < 7; day++) {
+                const index = weekIndex * 7 + day;
+                const dayButton = document.createElement('button');
+                dayButton.className = 'day yoga';
+                dayButton.dataset.type = 'yoga';
+                dayButton.dataset.index = index;
+                dayButton.innerHTML = `
+                    <div class="content">
+                        <span class="emoji">${yogaEmoji}</span>
+                        <span class="date">${formatDate(dates[index])}</span>
+                    </div>
+                    <div class="completed-emoji">${yogaCompletedEmoji}</div>
+                `;
+                dayButton.title = `Week ${weekIndex + 1} Day ${day + 1} - ${formatDate(dates[index])}`;
+                dayButton.setAttribute('aria-label', `Week ${weekIndex + 1} Day ${day + 1} - ${formatDate(dates[index])}`);
+                if (yogaProgress[index]) {
+                    dayButton.classList.add('completed');
+                    dayButton.setAttribute('aria-pressed', 'true');
+                } else {
+                    dayButton.setAttribute('aria-pressed', 'false');
+                }
+                dayButton.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const idx = parseInt(this.dataset.index);
+                    const progressArray = type === 'yoga' ? yogaProgress : weightsProgress;
+                    progressArray[idx] = !progressArray[idx];
+                    if (progressArray[idx]) {
+                        this.classList.add('completed');
+                        this.setAttribute('aria-pressed', 'true');
+                        const rect = this.getBoundingClientRect();
+                        confetti({
+                            particleCount: 50,
+                            spread: 30,
+                            origin: {
+                                x: (rect.left + rect.width / 2) / window.innerWidth,
+                                y: (rect.top + rect.height / 2) / window.innerHeight
+                            }
+                        });
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(50);
+                        }
+                    } else {
+                        this.classList.remove('completed');
+                        this.setAttribute('aria-pressed', 'false');
+                    }
+                    localStorage.setItem('yogaProgress', JSON.stringify(yogaProgress));
+                    localStorage.setItem('weightsProgress', JSON.stringify(weightsProgress));
+                });
+                yogaRow.appendChild(dayButton);
+            }
+
+            const weightsRow = document.createElement('div');
+            weightsRow.className = 'weights-row';
+            for (let session = 0; session < 4; session++) {
+                const wIndex = weekIndex * 4 + session;
+                const weightsButton = document.createElement('button');
+                weightsButton.className = 'day weights';
+                weightsButton.dataset.type = 'weights';
+                weightsButton.dataset.index = wIndex;
+                weightsButton.innerHTML = `
+                    <div class="content">
+                        <span class="emoji">${weightsEmoji}</span>
+                    </div>
+                    <div class="completed-emoji">${weightsCompletedEmoji}</div>
+                `;
+                weightsButton.title = `Week ${weekIndex + 1} Weight Lifting Session ${session + 1}`;
+                weightsButton.setAttribute('aria-label', `Week ${weekIndex + 1} Weight Lifting Session ${session + 1}`);
+                if (weightsProgress[wIndex]) {
+                    weightsButton.classList.add('completed');
+                    weightsButton.setAttribute('aria-pressed', 'true');
+                } else {
+                    weightsButton.setAttribute('aria-pressed', 'false');
+                }
+                weightsButton.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const idx = parseInt(this.dataset.index);
+                    const progressArray = type === 'yoga' ? yogaProgress : weightsProgress;
+                    progressArray[idx] = !progressArray[idx];
+                    if (progressArray[idx]) {
+                        this.classList.add('completed');
+                        this.setAttribute('aria-pressed', 'true');
+                        const rect = this.getBoundingClientRect();
+                        confetti({
+                            particleCount: 50,
+                            spread: 30,
+                            origin: {
+                                x: (rect.left + rect.width / 2) / window.innerWidth,
+                                y: (rect.top + rect.height / 2) / window.innerHeight
+                            }
+                        });
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(50);
+                        }
+                    } else {
+                        this.classList.remove('completed');
+                        this.setAttribute('aria-pressed', 'false');
+                    }
+                    localStorage.setItem('yogaProgress', JSON.stringify(yogaProgress));
+                    localStorage.setItem('weightsProgress', JSON.stringify(weightsProgress));
+                });
+                weightsRow.appendChild(weightsButton);
+            }
+
+            weekContent.appendChild(yogaRow);
+            weekContent.appendChild(weightsRow);
+            weekDiv.appendChild(weekLabel);
+            weekDiv.appendChild(weekContent);
+            tracker.appendChild(weekDiv);
+        }
+
+        // Reset button functionality
+        document.getElementById('reset').addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset your progress?')) {
+                yogaProgress = new Array(112).fill(false);
+                weightsProgress = new Array(64).fill(false);
+                localStorage.setItem('yogaProgress', JSON.stringify(yogaProgress));
+                localStorage.setItem('weightsProgress', JSON.stringify(weightsProgress));
+                document.querySelectorAll('.day').forEach(button => {
+                    button.classList.remove('completed');
+                    button.setAttribute('aria-pressed', 'false');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
